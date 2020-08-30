@@ -36,8 +36,6 @@ proc createLayoHak*(dir_string, outFile, bin: string) =
   when defined(posix):
     let r = resman.newResMan(100)
     r.add(openFileStream(outFile).readErf())
-    let r_count = r.count()
-    assert(r_count <= 16000, fmt"Hak {outFile} has more than 16k resources. (Resource Count: {r_count}).")
     success("Packed " & outFile)
 
 
@@ -80,7 +78,7 @@ Global Options:
         continue
       let
         hak_file_name = dir.replace("/", "_").replace("\\", "_").replace("parts_male", "pm").replace("parts_female", "pf")
-        file = fmt"lay_{hak_file_name}.hak"
+        file = fmt"l64_{hak_file_name}.hak"
 
       if existsFile(file):
         let fileTime = getNewestFile(dir).getLastModificationTime
@@ -99,7 +97,7 @@ Global Options:
     var tileset = 1
     for tileset_wildcard in tileset_wildcards:
       let dirs = getCurrentDir() & "/tilesets/" & tileset_wildcard
-      let file = fmt"lay_tiles{tileset}.hak"
+      let file = fmt"l64_tiles{tileset}.hak"
       tileset += 1
       if existsFile(file):
         let fileTime = getNewestFileFromGlob(dirs).getLastModificationTime
