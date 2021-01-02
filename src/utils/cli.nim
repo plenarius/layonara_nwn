@@ -176,11 +176,11 @@ proc ask*(question: string, default = "", allowBlank = true): string =
   else:
     if default == "":
       result = prompt(question)
-      if result.isNilOrWhitespace:
+      if result.isEmptyOrWhitespace:
         result = if allowBlank: "" else: ask(question)
     else:
       result = prompt("$1 (default: $2)" % [question, default])
-      if result.isNilOrWhitespace:
+      if result.isEmptyOrWhitespace:
         result = default
         stdout.cursorUp
         stdout.eraseLine

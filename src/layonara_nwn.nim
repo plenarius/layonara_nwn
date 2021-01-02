@@ -80,7 +80,7 @@ Global Options:
         hak_file_name = dir.replace("/", "_").replace("\\", "_").replace("parts_male", "pm").replace("parts_female", "pf")
         file = fmt"l64_{hak_file_name}.hak"
 
-      if existsFile(file):
+      if fileExists(file):
         let fileTime = getNewestFile(dir).getLastModificationTime
         let modTime = getLastModificationTime(file)
         if (fileTime < modTime):
@@ -99,7 +99,7 @@ Global Options:
       let dirs = getCurrentDir() & "/tilesets/" & tileset_wildcard
       let file = fmt"l64_tiles{tileset}.hak"
       tileset += 1
-      if existsFile(file):
+      if fileExists(file):
         let fileTime = getNewestFileFromGlob(dirs).getLastModificationTime
         let modTime = getLastModificationTime(file)
         if (fileTime < modTime):

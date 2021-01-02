@@ -81,7 +81,7 @@ proc getPackageRoot*(baseDir = getCurrentDir()): string =
   result = baseDir.absolutePath()
 
   for dir in parentDirs(result):
-    if existsFile(dir / "nasher.cfg"):
+    if fileExists(dir / "nasher.cfg"):
       return dir
 
 proc getConfigFile*(pkgDir = ""): string =
@@ -96,7 +96,7 @@ proc getPackageFile*(baseDir = getCurrentDir()): string =
   getPackageRoot(baseDir) / "nasher.cfg"
 
 proc existsPackageFile*(dir = getCurrentDir()): bool =
-  existsFile(getPackageFile(dir))
+  fileExists(getPackageFile(dir))
 
 proc parseConfigFile*(opts: Options, file: string) =
   ## Loads all all values from ``file`` into opts. This provides user-defined
@@ -349,7 +349,7 @@ proc dumpPackage(pkg: PackageRef) =
 proc loadPackageFile*(pkg: PackageRef, file: string): bool =
   ## Initializes ``pkg`` with the contents of ``file``. Returns whether the
   ## operation was successful.
-  if existsFile(file):
+  if fileExists(file):
     pkg.parsePackageFile(file)
     pkg.dumpPackage
     result = true
@@ -400,7 +400,7 @@ proc genSrcText(pattern = ""): string =
     defaultSrc = pattern
   while true:
     let answer = ask("Include pattern:", defaultSrc)
-    if answer.isNilOrWhitespace:
+    if answer.isEmptyOrWhitespace:
       break
     result.addPair("include", answer)
     defaultSrc = ""
@@ -410,7 +410,7 @@ proc genSrcText(pattern = ""): string =
   if askIf("Do you wish to exclude any files matching the include patterns?"):
     while true:
       let answer = ask("Exclude pattern:", allowBlank = false)
-      if answer.isNilOrWhitespace:
+      if answer.isEmptyOrWhitespace:
         break
       result.addPair("exclude", answer)
       if not askIf("Exclude another source pattern?", allowed = NotYes):
@@ -498,7 +498,7 @@ proc genPackageText*(opts: Options): string =
       authorEmail = ask("Author email:",
                         if authorName == defaultAuthor: defaultEmail else: "")
 
-    if authorEmail.isNilOrWhitespace:
+    if authorEmail.isEmptyOrWhitespace:
       result.addPair("author", authorName)
     else:
       result.addPair("author", "$1 <$2>" % [authorName, authorEmail])
