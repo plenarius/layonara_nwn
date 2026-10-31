@@ -5,7 +5,7 @@ import utils/[cli,shared,options]
 from sequtils import toSeq
 const
   Options = {poUsePath, poStdErrToStdOut}
-  tileset_wildcards = ["{eld**/*,p**/*,t[a-c]**/*}","t[d-p]**/*","t[q-z]**/*","[u-z]**/*","{mini**/*,load**/*,shar**/*}"]
+  tileset_wildcards = ["{eld**/*,p**/*,t[a-c]**/*}","t[d-p]**/*","t[q-z]**/*","[u-z]**/*","{mini**/*,load**/*,shar**/*}","{mst**/*,cat**/*}"]
 
 proc getNewestFile(dir: string): string =
   for file in walkFiles(dir / "*"):
