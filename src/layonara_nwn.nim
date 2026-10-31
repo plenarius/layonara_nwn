@@ -74,7 +74,7 @@ Global Options:
       for f in walkGlob(dir & "/*", options = optsOnlyFiles):
         noFiles = false
         break
-      if dir.startsWith(".git") or dir.startsWith("tilesets") or noFiles:
+      if dir.startsWith(".git") or dir.startsWith("tilesets") or dir.startsWith("vendor") or noFiles:
         continue
       let
         hak_file_name = dir.replace("/", "_").replace("\\", "_").replace("parts_male", "pm").replace("parts_female", "pf")
