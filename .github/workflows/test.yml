@@ -1,0 +1,29 @@
+name: Test
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Nim
+        uses: jiro4989/setup-nim-action@v2
+        with:
+          nim-version: '2.2.8'
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+
+      # The same neverwinter.nim as the server's builder image.
+      - name: Install dependencies
+        run: |
+          nimble install -y neverwinter@2.1.2
+          nimble install -y --depsOnly
+
+      - name: Test
+        run: |
+          export PATH="$HOME/.nimble/bin:$PATH"
+          nimble test
