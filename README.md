@@ -16,9 +16,9 @@ the NWN World of Layonara. Currently the only functionality is for
 building the haks located at https://github.com/layonara/nwn-haks
 
 ## Requirements
-- [Nim](https://nim-lang.org/install.html) 2.0 or newer (the server build uses 2.2.8)
+- [Nim](https://nim-lang.org/install.html) 2.0 or newer (the server build and CI use 2.4.0)
 - [neverwinter.nim](https://github.com/niv/neverwinter.nim) (the library, and
-  its `nwn_erf` on the PATH; the server build uses 2.1.2)
+  its `nwn_erf` on the PATH; the server build and CI use 2.3.2)
 - For `--compile` only:
   - [cleanmodels](https://github.com/plenarius/cleanmodels/releases) 4.18.1 or
     newer (the server build pins 4.18.1; older versions are refused); and

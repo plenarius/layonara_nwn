@@ -14,14 +14,15 @@ jobs:
       - name: Install Nim
         uses: jiro4989/setup-nim-action@v2
         with:
-          nim-version: '2.2.8'
+          nim-version: '2.4.0'
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
-      # The same neverwinter.nim as the server's builder image.
+      # The same Nim and packages as the server's builder image (layonara-infra nwsync-builder/Dockerfile, #59): --requires
+      # pins each one exactly. Installing neverwinter@<v> first doesn't pin it: nimble then installs the newest as well.
       - name: Install dependencies
         run: |
-          nimble install -y neverwinter@2.1.2
-          nimble install -y --depsOnly
+          nimble install -y --depsOnly --requires:"neverwinter == 2.3.2; glob == 0.11.3; docopt == 0.7.1; checksums == 0.2.2; db_connector == 0.1.0; taskpools == 0.2.3; regex == 0.27.0; unicodedb == 0.14.1; unittest2 == 0.3.0"
+          test "$(ls ~/.nimble/pkgs2 | grep -c '^neverwinter-')" = 1
 
       - name: Test
         run: |

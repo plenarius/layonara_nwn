@@ -14,10 +14,12 @@ jobs:
       - name: Install Nim
         uses: jiro4989/setup-nim-action@v2
         with:
-          nim-version: '2.2.0'
+          nim-version: '2.4.0'
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
 
+      # The same Nim and packages as the server's builder image (layonara-infra nwsync-builder/Dockerfile, #59).
       - name: Build layonara_nwn
-        run: nimble install -y
+        run: nimble install -y --requires:"neverwinter == 2.3.2; glob == 0.11.3; docopt == 0.7.1; checksums == 0.2.2; db_connector == 0.1.0; taskpools == 0.2.3; regex == 0.27.0; unicodedb == 0.14.1; unittest2 == 0.3.0"
 
       - name: Package binary
         run: |
