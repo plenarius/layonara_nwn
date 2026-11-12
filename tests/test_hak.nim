@@ -248,7 +248,8 @@ suite "pack with --compile":
     let stage = fx / ".hakstage"
     check getFileInfo(stage / "tree" / "c" / "bin01.mdl").id == getFileInfo(fx / "c" / "bin01.mdl").id
     check readFile(stage / "res" / "models" / "sup1.mdl") == superB
-    check not fileExists(stage / "res" / "models" / "m_c.mdl")   # only reachable supermodels
+    check fileExists(stage / "res" / "models" / "m_c.mdl")       # every winning model
+    check readFile(stage / "res" / "models" / "door01.mdl") == readFile(fx / "doors" / "door01.mdl")
     check fileExists(stage / "res" / "resources" / "m_c.mtr")
     check "sup1\tmdl\t" & "b" / "sup1.mdl" & "\t" & "a" / "sup1.mdl" in readFile(stage / "res" / "winners.tsv")
     check "11 models compiled (0 from the cache), 1 binary models passed through, 0 failed" in output
@@ -282,19 +283,21 @@ suite "pack with --compile":
     check code == 0
     check "No --hak-order given" in output
 
-  test "cleanmodels 4.18.1 links every winning model":
-    let (output, code) = run(fx, compileArgs(work / "out-4181", goodGame, "") & @["--keep-stage"],
-                             [("FAKE_CM_VERSION", "4.18.1")])
+  test "a newer cleanmodels than the pinned one only warns":
+    let (output, code) = run(fx, compileArgs(work / "out-4182", goodGame, ""),
+                             [("FAKE_CM_VERSION", "4.18.2")])
     check code == 0
     if code != 0: echo output
-    check fileExists(fx / ".hakstage" / "res" / "models" / "m_c.mdl")
-    check "not 4.18.0 as the server build uses" in output
+    check "not 4.18.1 as the server build uses" in output
 
   test "too old a cleanmodels is refused":
-    let (output, code) = run(fx, compileArgs(work / "out-old", goodGame, ""),
-                             [("FAKE_CM_VERSION", "4.17.5")])
-    check code != 0
-    check "needs 4.18.0 or newer" in output
+    for old in ["4.18.0", "4.17.5"]:
+      let outDir = work / "out-old"
+      removeDir(outDir)
+      let (output, code) = run(fx, compileArgs(outDir, goodGame, ""), [("FAKE_CM_VERSION", old)])
+      check code != 0
+      check "is cleanmodels " & old & "; this build needs 4.18.1 or newer" in output
+      check toSeq(walkFiles(outDir / "*.hak")).len == 0
 
   test "the canary stops a build against a game folder with no real models":
     let outDir = work / "out-canary"

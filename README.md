@@ -20,8 +20,8 @@ building the haks located at https://github.com/layonara/nwn-haks
 - [neverwinter.nim](https://github.com/niv/neverwinter.nim) (the library, and
   its `nwn_erf` on the PATH; the server build uses 2.1.2)
 - For `--compile` only:
-  - [cleanmodels](https://github.com/plenarius/cleanmodels/releases) 4.18.0 or
-    newer (the server build pins 4.18.0); and
+  - [cleanmodels](https://github.com/plenarius/cleanmodels/releases) 4.18.1 or
+    newer (the server build pins 4.18.1; older versions are refused); and
   - a full NWN:EE install, for the stock supermodels and skeletons.
 
 ## Installation
@@ -58,7 +58,9 @@ it is packed. The checkout itself is never changed:
 - binary `.mdl` and every other file, `.wok` included, are packed exactly as
   they are in the repo (cleanmodels' own `.wok` output is never used);
 - supermodels, skeletons and materials that exist in several haks are taken
-  from the hak that wins in the module's hak order. Pass that order with
+  from the hak that wins in the module's hak order (every model's winning copy
+  is linked into the staging folder's `res/models/` and handed to cleanmodels
+  as a supermodel folder). Pass that order with
   `--hak-order`: a `.mod`, nwn-module's `module.ifo.json`, or a text file with
   one hak name a line. Without it the haks count in alphabetical order, which
   can differ from the game's.
@@ -100,7 +102,7 @@ or the usual Steam and GOG folders). cleanmodels is found through
 Keep the staging folder on the same drive as the checkout: hard links only work
 within one volume, and otherwise every file is copied (slower, and it warns).
 `.hakstage/` is removed after a successful build; `--keep-stage` keeps it, with
-`res/winners.tsv` listing which copy of each supermodel and material won.
+`res/winners.tsv` listing which copy of each model and material won.
 
 Other options: `--workers N` (cleanmodels workers, default 2). See
 `layonara_nwn --help`.
