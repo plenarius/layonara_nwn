@@ -5,7 +5,8 @@
 ## the same volume as the checkout so hard links work):
 ##
 ##   canary/            a tiny model compiled first to prove the game folder has real models
-##   res/models/        supermodels and skeletons, the copy from the highest-priority hak
+##   res/models/        every model, the copy from the highest-priority hak (cleanmodels
+##                      looks supermodels and skeletons up here)
 ##   res/resources/     materials (.mtr) and capart.2da, likewise
 ##   res/winners.tsv    which copy of each name won, and which it shadowed
 ##   tree/<folder>/     hard links to the repo's files, with each ASCII .mdl
@@ -21,15 +22,12 @@ import neverwinter/[erf, gff, gffjson, resman, resref]
 import cli, hakplan
 
 const
-  MinCleanmodels* = "4.18.0"
-    ## Oldest cleanmodels accepted.
-  PinnedCleanmodels* = "4.18.0"
+  MinCleanmodels* = "4.18.1"
+    ## Oldest cleanmodels accepted: the first that indexes each search folder
+    ## once per process, so res/models can hold every winning .mdl (older ones
+    ## list a big folder again on every lookup).
+  PinnedCleanmodels* = "4.18.1"
     ## The version the builder image uses; any other version only warns.
-  DirIndexCleanmodels* = "4.18.1"
-    ## First cleanmodels that indexes each search folder once per process. From
-    ## this version on every winning .mdl goes into res/models; before it only
-    ## the supermodels and skeletons models can reach (a big folder would be
-    ## listed again on every lookup).
   CleanmodelsReleases* = "https://github.com/plenarius/cleanmodels/releases"
   ChunkMaxFiles = 400
   ChunkMaxChars = 24_000
@@ -102,7 +100,7 @@ proc findCleanmodels*(flag: string): string =
           " (cleanmodels-<os>-<arch>.zip) and put it on the PATH, set CLEANMODELS, or pass --cleanmodels PATH.")
 
 proc cleanmodelsVersion*(bin: string): Version =
-  ## Runs `cleanmodels --version` (`cleanmodels v4.18.0 (revision …)`), refuses
+  ## Runs `cleanmodels --version` (`cleanmodels v4.18.1 (revision …)`), refuses
   ## anything older than MinCleanmodels and warns when it isn't the pinned one.
   var output: string
   var code: int
@@ -422,8 +420,8 @@ proc compileFolder*(opts: CompileOptions, inputs: seq[string], outDir: string,
 # Resource folders
 
 proc buildResFolders*(opts: CompileOptions, plan: seq[HakSpec], ranks: Table[string, int]) =
-  ## Links the copy of each supermodel/skeleton, material and capart.2da from
-  ## the highest-priority hak into res/, writes res/winners.tsv, and warns when
+  ## Links the copy of each model, material and capart.2da from the
+  ## highest-priority hak into res/, writes res/winners.tsv, and warns when
   ## a model would pick up a different, losing copy from its own folder.
   let res = opts.stage / "res"
   clearStageDir(res)
@@ -432,7 +430,6 @@ proc buildResFolders*(opts: CompileOptions, plan: seq[HakSpec], ranks: Table[str
 
   var cands = initTable[(string, string), seq[Candidate]]()
   var asciiByFolder = initTable[string, seq[string]]()  # folder rel -> ASCII model paths (rel)
-  var allMdl: seq[string]
   for spec in plan:
     for rel in spec.folders:
       for kind, path in walkDir(opts.root / rel, relative = true):
@@ -447,33 +444,13 @@ proc buildResFolders*(opts: CompileOptions, plan: seq[HakSpec], ranks: Table[str
         if key[0].len == 0: continue
         let relPath = rel / path
         cands.mgetOrPut(key, @[]).add Candidate(path: relPath, hak: spec.name, rank: ranks[spec.name])
-        if key[1] == "mdl":
-          allMdl.add relPath
-          if not isBinaryMdl(opts.root / relPath):
-            asciiByFolder.mgetOrPut(rel, @[]).add relPath
+        if key[1] == "mdl" and not isBinaryMdl(opts.root / relPath):
+          asciiByFolder.mgetOrPut(rel, @[]).add relPath
 
   for key, list in cands.mpairs:
     list.sort(proc (a, b: Candidate): int =
       result = cmp(a.rank, b.rank)
       if result == 0: result = cmp(a.path, b.path))
-
-  # Which models go into res/models.
-  var linkModels: HashSet[string]
-  let allWinners = opts.version >= parseVersion(DirIndexCleanmodels).get
-  if allWinners:
-    for key in cands.keys:
-      if key[1] == "mdl": linkModels.incl key[0]
-  else:
-    var todo: seq[string]
-    for p in allMdl:
-      for s in supersOf(opts.root / p): todo.add s
-    while todo.len > 0:
-      let name = todo.pop
-      if name in linkModels: continue
-      linkModels.incl name
-      if (name, "mdl") in cands:
-        for s in supersOf(opts.root / cands[(name, "mdl")][0].path):
-          if s notin linkModels: todo.add s
 
   var tsv = open(res / "winners.tsv", fmWrite)
   defer: tsv.close
@@ -486,17 +463,12 @@ proc buildResFolders*(opts: CompileOptions, plan: seq[HakSpec], ranks: Table[str
     let list = cands[key]
     let (name, ext) = key
     let winner = list[0]
-    let linked =
-      if ext == "mdl": name in linkModels
-      else: true
-    if linked:
-      let dest = if ext == "mdl": res / "models" / name & ".mdl"
-                 elif ext == "mtr": res / "resources" / name & ".mtr"
-                 else: res / "resources" / "capart.2da"
-      linkOrCopy(opts.root / winner.path, dest)
-      if ext == "mdl": inc nModels else: inc nResources
-    if linked or list.len > 1:
-      tsv.writeLine(&"{name}\t{ext}\t{winner.path}\t" & list[1..^1].mapIt(it.path).join(";"))
+    let dest = if ext == "mdl": res / "models" / name & ".mdl"
+               elif ext == "mtr": res / "resources" / name & ".mtr"
+               else: res / "resources" / "capart.2da"
+    linkOrCopy(opts.root / winner.path, dest)
+    if ext == "mdl": inc nModels else: inc nResources
+    tsv.writeLine(&"{name}\t{ext}\t{winner.path}\t" & list[1..^1].mapIt(it.path).join(";"))
 
     # A losing copy that differs, in a folder that gets compiled, and that a
     # model there would look up: cleanmodels searches the own folder first.
@@ -518,8 +490,7 @@ proc buildResFolders*(opts: CompileOptions, plan: seq[HakSpec], ranks: Table[str
       if used:
         warning(&"{loser.path} ({loser.hak}) differs from {winner.path} ({winner.hak}), which wins in " &
                 &"the hak order, but models in {folder} will use their own copy when they compile.")
-  display("Resources:", &"{nModels} supermodels and skeletons, {nResources} materials and capart.2da " &
-          &"linked into {res} (variant: {(if allWinners: \"all models\" else: \"reachable supermodels\")})")
+  display("Resources:", &"{nModels} models, {nResources} materials and capart.2da linked into {res}")
 
 # ----------------------------------------------------------------------------
 # Staging and compiling one hak
