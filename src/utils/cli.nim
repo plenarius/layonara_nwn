@@ -66,7 +66,9 @@ proc displayLine(category, line: string, displayType: DisplayType, priority: Pri
   echo(line)
 
 proc getMsgWidth(category: string): int =
-  let maxWidth = if stdout.isatty: terminalWidth() - category.len else: 80
+  # Only wrap for a terminal: wrapping a log breaks paths in two.
+  if not stdout.isatty: return high(int) div 2
+  let maxWidth = terminalWidth() - category.len
   result = maxWidth - colWidth - 1
 
 proc display*(category, msg: string, displayType = Message, priority = MediumPriority) =

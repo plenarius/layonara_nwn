@@ -4,3 +4,5 @@ tests/fuzzing/results
 layonara_nwn
 tests/test_*
 !tests/test_*.nim
+tests/work
+.hakstage
