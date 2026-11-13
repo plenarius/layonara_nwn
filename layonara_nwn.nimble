@@ -1,6 +1,6 @@
 # Package
 
-version       = "0.2.0"
+version       = "0.2.1"
 author        = "James Greenhalgh"
 description   = "Various Layonara related functions for NWN Development"
 license       = "MIT"

@@ -20,8 +20,9 @@ building the haks located at https://github.com/layonara/nwn-haks
 - [neverwinter.nim](https://github.com/niv/neverwinter.nim) (the library, and
   its `nwn_erf` on the PATH; the server build and CI use 2.3.2)
 - For `--compile` only:
-  - [cleanmodels](https://github.com/plenarius/cleanmodels/releases) 4.18.1 or
-    newer (the server build pins 4.18.1; older versions are refused); and
+  - [cleanmodels](https://github.com/plenarius/cleanmodels/releases) 4.18.3
+    (the server build pins it). 4.18.1 and 4.18.2 still work but warn, since
+    their models differ from the server's; older versions are refused; and
   - a full NWN:EE install, for the stock supermodels and skeletons.
 
 ## Installation

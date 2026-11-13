@@ -1,6 +1,6 @@
 ## A stand-in for cleanmodels, so the tests need no game and no real compiler.
 ##
-## `--version` prints `cleanmodels v$FAKE_CM_VERSION` (default 4.18.1).
+## `--version` prints `cleanmodels v$FAKE_CM_VERSION` (default 4.18.3, the pinned version).
 ## `compile [flags] <input>... <outdir>/` streams `--json-lines` events like
 ## cleanmodels does and writes, for each input, `<outdir>/<name>`:
 ##
@@ -28,7 +28,7 @@ proc findSuper(name: string, dirs: seq[string]): (string, bool) =
 proc main() =
   let args = commandLineParams()
   if args.len > 0 and args[0] == "--version":
-    echo "cleanmodels v" & getEnv("FAKE_CM_VERSION", "4.18.1") & " (revision fake)"
+    echo "cleanmodels v" & getEnv("FAKE_CM_VERSION", "4.18.3") & " (revision fake)"
     quit 0
   if args.len == 0 or args[0] != "compile":
     quit("fake cleanmodels: unsupported arguments: " & args.join(" "), 2)

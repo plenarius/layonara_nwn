@@ -284,11 +284,11 @@ suite "pack with --compile":
     check "No --hak-order given" in output
 
   test "a newer cleanmodels than the pinned one only warns":
-    let (output, code) = run(fx, compileArgs(work / "out-4182", goodGame, ""),
-                             [("FAKE_CM_VERSION", "4.18.2")])
+    let (output, code) = run(fx, compileArgs(work / "out-4184", goodGame, ""),
+                             [("FAKE_CM_VERSION", "4.18.4")])
     check code == 0
     if code != 0: echo output
-    check "not 4.18.1 as the server build uses" in output
+    check "not 4.18.3 as the server build uses" in output
 
   test "too old a cleanmodels is refused":
     for old in ["4.18.0", "4.17.5"]:
