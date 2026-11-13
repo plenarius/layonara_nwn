@@ -26,7 +26,7 @@ const
     ## Oldest cleanmodels accepted: the first that indexes each search folder
     ## once per process, so res/models can hold every winning .mdl (older ones
     ## list a big folder again on every lookup).
-  PinnedCleanmodels* = "4.18.1"
+  PinnedCleanmodels* = "4.18.3"
     ## The version the builder image uses; any other version only warns.
   CleanmodelsReleases* = "https://github.com/plenarius/cleanmodels/releases"
   ChunkMaxFiles = 400
@@ -100,7 +100,7 @@ proc findCleanmodels*(flag: string): string =
           " (cleanmodels-<os>-<arch>.zip) and put it on the PATH, set CLEANMODELS, or pass --cleanmodels PATH.")
 
 proc cleanmodelsVersion*(bin: string): Version =
-  ## Runs `cleanmodels --version` (`cleanmodels v4.18.1 (revision …)`), refuses
+  ## Runs `cleanmodels --version` (`cleanmodels v4.18.3 (revision …)`), refuses
   ## anything older than MinCleanmodels and warns when it isn't the pinned one.
   var output: string
   var code: int
